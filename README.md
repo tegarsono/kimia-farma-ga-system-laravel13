@@ -1,6 +1,6 @@
-# 🏥 Kimia Farma GA — Laravel 11 System
+# 🏥 Kimia Farma GA — Laravel 13 System
 
-Konversi lengkap dari **PHP Native** ke **Laravel 11** untuk sistem manajemen General Affair Kimia Farma Apotek.
+Konversi lengkap dari **PHP Native** ke **Laravel 13** untuk sistem manajemen General Affair Kimia Farma Apotek.
 
 ---
 
@@ -145,7 +145,7 @@ kimiafarma-laravel/
 │   │       └── RoleMiddleware.php
 │   └── Providers/
 │       └── AppServiceProvider.php
-├── bootstrap/app.php           # Laravel 11 bootstrap
+├── bootstrap/app.php           # Laravel 13 bootstrap
 ├── config/
 │   ├── app.php
 │   ├── database.php
@@ -202,7 +202,7 @@ kimiafarma-laravel/
 
 ## 🔄 Perbedaan dari PHP Native
 
-| Aspek           | PHP Native (Lama)              | Laravel 11 (Baru)                    |
+| Aspek           | PHP Native (Lama)              | Laravel 13 (Baru)                    |
 |-----------------|-------------------------------|--------------------------------------|
 | Routing         | File PHP langsung             | `routes/web.php` terpusat            |
 | Auth            | `$_SESSION` manual            | Middleware + session Laravel         |
