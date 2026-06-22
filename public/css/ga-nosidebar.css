@@ -1,0 +1,215 @@
+:root {
+    --ga-primary: #1565c0;
+    --ga-primary-hover: #1976d2;
+    --ga-primary-light: #e3f0ff;
+    --ga-page-bg: #f0f2f5;
+    --ga-card-bg: #ffffff;
+    --ga-text-dark: #1a2744;
+    --ga-text-muted: #6b7280;
+    --ga-border: #e2e8f0;
+    --ga-shadow-card: 0 1px 4px rgba(0, 0, 0, .08), 0 4px 16px rgba(21, 101, 192, .07);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--ga-page-bg);
+    color: var(--ga-text-dark);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* ============================================
+   TOPBAR (full width, no sidebar)
+   ============================================ */
+.topbar {
+    height: 60px;
+    padding: 0 24px;
+    background-color: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1030;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.topbar h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a2744;
+    margin: 0;
+}
+
+/* ============================================
+   CONTENT WRAPPER (full width)
+   ============================================ */
+.content-wrapper {
+    padding-top: 80px;
+    min-height: 100vh;
+    background-color: var(--ga-page-bg);
+}
+
+/* ============================================
+   CARDS
+   ============================================ */
+.card {
+    border: 1px solid var(--ga-border);
+    border-radius: 12px;
+    box-shadow: var(--ga-shadow-card);
+    background-color: var(--ga-card-bg);
+}
+
+.card-header {
+    background-color: var(--ga-primary);
+    color: #fff;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0 !important;
+    font-weight: 600;
+    padding: .85rem 1.25rem;
+}
+
+.card-header.bg-white {
+    background-color: #fff !important;
+    color: var(--ga-text-dark);
+    border-bottom: 1px solid var(--ga-border);
+}
+
+.card-header.bg-light {
+    background-color: #f8fafc !important;
+    color: var(--ga-text-dark);
+    border-bottom: 1px solid var(--ga-border);
+}
+
+/* ============================================
+   TABLE
+   ============================================ */
+.table {
+    background-color: var(--ga-card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background-color: var(--ga-primary);
+    color: #fff;
+    border-bottom: none;
+    font-weight: 600;
+    font-size: .875rem;
+    letter-spacing: .3px;
+    padding: .85rem 1rem;
+}
+
+.table tbody tr:hover {
+    background-color: var(--ga-primary-light);
+}
+
+.table td,
+.table th {
+    vertical-align: middle;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn-primary {
+    background-color: var(--ga-primary);
+    border-color: var(--ga-primary);
+    color: #fff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--ga-primary-hover);
+    border-color: var(--ga-primary-hover);
+    color: #fff;
+}
+
+.btn-warning {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+    color: #fff;
+}
+
+.btn-warning:hover {
+    background-color: #d97706;
+    border-color: #d97706;
+    color: #fff;
+}
+
+.btn-outline-primary {
+    color: var(--ga-primary);
+    border-color: var(--ga-primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--ga-primary);
+    border-color: var(--ga-primary);
+    color: #fff;
+}
+
+/* ============================================
+   FORMS
+   ============================================ */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--ga-primary);
+    box-shadow: 0 0 0 .2rem rgba(21, 101, 192, .18);
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--ga-text-dark);
+    font-size: .9rem;
+}
+
+/* ============================================
+   ALERT TOAST
+   ============================================ */
+#alert-container {
+    position: fixed;
+    top: 70px;
+    right: 16px;
+    z-index: 9999;
+    min-width: 300px;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 767.98px) {
+    .content-wrapper.px-4 {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .btn {
+        font-size: .82rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .card-header {
+        font-size: .9rem;
+        padding: .6rem 1rem;
+    }
+
+    .badge {
+        font-size: .7rem;
+    }
+}
+
