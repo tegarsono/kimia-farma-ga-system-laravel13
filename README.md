@@ -1,59 +1,223 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏥 Kimia Farma GA — Laravel 11 System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Konversi lengkap dari **PHP Native** ke **Laravel 11** untuk sistem manajemen General Affair Kimia Farma Apotek.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📋 Fitur Lengkap
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 🔐 Autentikasi
+- Login dengan username atau email
+- Reset password via OTP ke email (6 digit, berlaku 15 menit)
+- Manajemen profil & ganti password
+- Middleware session-based (tanpa Laravel Auth bawaan)
+- Role: `admin`, `staff`, `manager`
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 🏢 General Affair (GA)
+- **Dashboard** dengan grafik Chart.js (kendaraan per branch, tanah & bangunan, tren ATK)
+- **Aset Kendaraan** — CRUD, filter, export Excel, import Excel (template tersedia)
+- **Aset Tanah & Bangunan** — CRUD, filter, export Excel, import Excel
+- **Sentralisasi ATK** — CRUD, barang keluar, riwayat transaksi, export Excel + PDF stok
+- **Biaya Umum** — CRUD, filter per bulan/tahun
 
-## Learning Laravel
+### ❄️ AC / Monitoring Maintenance
+- **Dashboard Monitoring** dengan statistik Normal / Wajib Service
+- Notifikasi otomatis untuk item yang >3 bulan tidak dirawat
+- Export Excel, generate PDF (semua / terpilih / rekap bulanan)
+- Import data via Excel
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 🚗 Driver Operasional
+- **Dashboard** jadwal hari ini, status supir real-time
+- **Jadwal** — buat, edit, tandai selesai (pindah ke riwayat), konflik jadwal terdeteksi
+- **Riwayat** perjalanan dengan export PDF
+- **Data Armada Mobil** — CRUD
+- **Data Supir** — CRUD, status aktif/idle/offline
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### ⚙️ Pengaturan (Admin)
+- Kelola semua gambar sistem (logo, background, favicon)
+- Dua mode: URL eksternal atau upload file
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🚀 Instalasi
 
-### Premium Partners
+### 1. Prasyarat
+- PHP 8.2+
+- Composer
+- MySQL 8.0+ / MariaDB 10.6+
+- Node.js (opsional, untuk asset build)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 2. Clone & Install
 
-## Contributing
+```bash
+# Masuk ke direktori project
+cd kimiafarma-laravel
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Install dependencies
+composer install
 
-## Code of Conduct
+# Salin file konfigurasi
+cp .env.example .env
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Generate app key
+php artisan key:generate
 
-## Security Vulnerabilities
+# Link storage untuk file upload
+php artisan storage:link
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 3. Konfigurasi Database
 
-## License
+Edit file `.env`:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=db_kimiafarma
+DB_USERNAME=root
+DB_PASSWORD=your_password
+```
+
+### 4. Migrasi & Seeder
+
+```bash
+# Buat semua tabel
+php artisan migrate
+
+# Isi data awal (user admin + image settings + sample data)
+php artisan db:seed
+```
+
+### 5. Konfigurasi Email (untuk OTP)
+
+Edit `.env`:
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your@gmail.com
+MAIL_PASSWORD=your_app_password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=your@gmail.com
+MAIL_FROM_NAME="KFA GA System"
+```
+
+### 6. Jalankan Server
+
+```bash
+php artisan serve
+```
+
+Buka: **http://localhost:8000**
+
+---
+
+## 🔑 Akun Default
+
+| Field    | Value                    |
+|----------|--------------------------|
+| Username | `adminkfa`               |
+| Email    | `kimiafarma@gmail.com`   |
+| Password | `admin123`               |
+| Role     | `admin`                  |
+
+> ⚠️ **Ganti password setelah login pertama!**
+
+---
+
+## 📁 Struktur Direktori
+
+```
+kimiafarma-laravel/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Auth/           # Login, Profil, Reset Password
+│   │   │   ├── GA/             # General Affair module
+│   │   │   ├── AcMonitoring/   # Monitoring Maintenance
+│   │   │   ├── Driver/         # Driver Operasional
+│   │   │   ├── DashboardController.php
+│   │   │   └── SettingsController.php
+│   │   └── Middleware/
+│   │       ├── AuthSessionMiddleware.php
+│   │       └── RoleMiddleware.php
+│   └── Providers/
+│       └── AppServiceProvider.php
+├── bootstrap/app.php           # Laravel 11 bootstrap
+├── config/
+│   ├── app.php
+│   ├── database.php
+│   └── session.php
+├── database/
+│   ├── migrations/             # Semua tabel dalam 1 file
+│   └── seeders/DatabaseSeeder.php
+├── resources/views/
+│   ├── layouts/app.blade.php   # Layout utama (sidebar + topbar)
+│   ├── auth/                   # Login, OTP, Reset password
+│   ├── dashboard.blade.php     # Hub utama
+│   ├── ga/                     # General Affair views
+│   ├── ac_monitoring/          # AC / Monitoring views
+│   ├── driver/                 # Driver views
+│   ├── profile/                # Profil user
+│   └── settings/               # Pengaturan gambar
+└── routes/web.php              # Semua route
+```
+
+---
+
+## 📦 Dependencies Utama
+
+```json
+{
+  "laravel/framework": "^11.0",
+  "barryvdh/laravel-dompdf": "^2.2",
+  "maatwebsite/excel": "^3.1",
+  "phpoffice/phpspreadsheet": "^1.29"
+}
+```
+
+---
+
+## 🗄️ Tabel Database
+
+| Tabel               | Fungsi                           |
+|---------------------|----------------------------------|
+| `users`             | Data pengguna sistem             |
+| `password_resets`   | Token OTP reset password         |
+| `image_settings`    | Konfigurasi gambar/logo sistem   |
+| `kendaraan_aset`    | Aset kendaraan GA                |
+| `tanah_bangunan_aset`| Aset tanah dan bangunan         |
+| `atk_katalog`       | Katalog barang ATK               |
+| `atk_transaksi`     | Riwayat transaksi ATK keluar     |
+| `biaya_umum`        | Pencatatan biaya operasional     |
+| `tb_monitoring`     | Monitoring maintenance           |
+| `mobil`             | Data armada kendaraan operasional|
+| `supir`             | Data supir/driver                |
+| `jadwal`            | Jadwal tugas driver aktif        |
+| `riwayat_jadwal`    | Riwayat perjalanan selesai       |
+
+---
+
+## 🔄 Perbedaan dari PHP Native
+
+| Aspek           | PHP Native (Lama)              | Laravel 11 (Baru)                    |
+|-----------------|-------------------------------|--------------------------------------|
+| Routing         | File PHP langsung             | `routes/web.php` terpusat            |
+| Auth            | `$_SESSION` manual            | Middleware + session Laravel         |
+| DB Query        | MySQLi/PDO manual             | Laravel Query Builder (`DB::table`)  |
+| Template        | PHP + HTML campur             | Blade Template Engine                |
+| Validasi        | Manual `if-else`              | Laravel `$request->validate()`       |
+| CSRF            | Token manual                  | `@csrf` directive otomatis           |
+| Pagination      | Manual                        | Laravel Pagination bawaan            |
+| Upload file     | `move_uploaded_file`          | `Storage::putFile` / `storeAs`       |
+| Error handling  | `die()` / `exit()`            | Laravel Exception Handler            |
+| PDF             | dompdf raw                    | `barryvdh/laravel-dompdf` facade     |
+| Excel           | PHPExcel (deprecated)         | PhpSpreadsheet via helper controller |
+
+---
+
+## 📞 Support
+
+Hubungi tim IT General Affair Kimia Farma Apotek.
