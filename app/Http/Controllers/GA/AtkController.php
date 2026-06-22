@@ -113,33 +113,73 @@ class AtkController extends Controller
             'keterangan' => 'nullable|string|max:255',
         ]);
 
-        $kode = $this->generateKode();
+        $spesifikasi = $request->spesifikasi;
+        $keterangan = $request->keterangan;
+        $statusBarang = 'Masuk';
 
-        $id = DB::table('atk_katalog')->insertGetId([
-            'kode' => $kode,
-            'kategori' => $request->kategori,
-            'nama_barang' => $request->nama_barang,
-            'satuan' => $request->satuan,
-            'harga' => $request->harga,
-            'jumlah' => $request->jumlah,
-            'status_barang' => 'Masuk',
-            'spesifikasi' => $request->spesifikasi,
-            'keterangan' => $request->keterangan,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        DB::beginTransaction();
+        try {
+            $existing = DB::table('atk_katalog')
+                ->where('kategori', $request->kategori)
+                ->where('nama_barang', $request->nama_barang)
+                ->where('satuan', $request->satuan)
+                ->where('harga', $request->harga)
+                ->where('spesifikasi', $spesifikasi)
+                ->where('keterangan', $keterangan)
+                ->where('status_barang', $statusBarang)
+                ->first();
 
-        DB::table('atk_transaksi')->insert([
-            'tanggal' => now()->toDateString(),
-            'jenis' => $request->kategori,
-            'jumlah' => $request->jumlah,
-            'keterangan' => $request->keterangan ?? '',
-            'id_barang' => $id,
-            'created_at' => now(),
-        ]);
+            if ($existing) {
+                // Update saja jumlah (bukan tambah record baru)
+                DB::table('atk_katalog')->where('id', $existing->id)->update([
+                    'jumlah' => DB::raw('jumlah + ' . (int) $request->jumlah),
+                    'updated_at' => now(),
+                ]);
 
-        return redirect()->route('ga.atk.index')->with('success', 'Barang ATK berhasil ditambahkan.');
+                DB::table('atk_transaksi')->insert([
+                    'tanggal' => now()->toDateString(),
+                    'jenis' => 'masuk',
+                    'jumlah' => (int) $request->jumlah,
+                    'keterangan' => $request->keterangan ?? '',
+                    'id_barang' => $existing->id,
+                    'created_at' => now(),
+                ]);
+            } else {
+                $kode = $this->generateKode();
+
+                $id = DB::table('atk_katalog')->insertGetId([
+                    'kode' => $kode,
+                    'kategori' => $request->kategori,
+                    'nama_barang' => $request->nama_barang,
+                    'satuan' => $request->satuan,
+                    'harga' => $request->harga,
+                    'jumlah' => (int) $request->jumlah,
+                    'status_barang' => $statusBarang,
+                    'spesifikasi' => $spesifikasi,
+                    'keterangan' => $keterangan,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                DB::table('atk_transaksi')->insert([
+                    'tanggal' => now()->toDateString(),
+                    'jenis' => 'masuk',
+                    'jumlah' => (int) $request->jumlah,
+                    'keterangan' => $request->keterangan ?? '',
+                    'id_barang' => $id,
+                    'created_at' => now(),
+                ]);
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('ga.atk.index')->with('error', 'Gagal menambah data ATK: ' . $e->getMessage());
+        }
+
+        return redirect()->route('ga.atk.index')->with('success', 'Barang ATK berhasil ditambahkan/ditambahkan stoknya.');
     }
+
 
     public function edit(int $id)
     {
@@ -225,13 +265,16 @@ class AtkController extends Controller
 
         DB::beginTransaction();
         try {
-            $sisaStok = $barang->jumlah - $request->jumlah;
+            $qty = (int) $request->jumlah;
 
+            // 1) Kurangi stok MASUK untuk barang yang ditransfer
+            $sisaStok = (int) $barang->jumlah - $qty;
             DB::table('atk_katalog')->where('id', $request->id_barang)->update([
                 'jumlah' => $sisaStok,
                 'updated_at' => now(),
             ]);
 
+            // 2) Naikkan stok KELUAR untuk barang keluar (kode & status Keluar)
             $barangKeluar = DB::table('atk_katalog')
                 ->where('kode', $barang->kode)
                 ->where('status_barang', 'Keluar')
@@ -239,7 +282,7 @@ class AtkController extends Controller
 
             if ($barangKeluar) {
                 DB::table('atk_katalog')->where('id', $barangKeluar->id)->update([
-                    'jumlah' => $barangKeluar->jumlah + $request->jumlah,
+                    'jumlah' => (int) $barangKeluar->jumlah + $qty,
                     'updated_at' => now(),
                 ]);
                 $idBarangKeluar = $barangKeluar->id;
@@ -252,17 +295,18 @@ class AtkController extends Controller
                     'harga' => $barang->harga,
                     'spesifikasi' => $barang->spesifikasi,
                     'status_barang' => 'Keluar',
-                    'jumlah' => $request->jumlah,
+                    'jumlah' => $qty,
                     'keterangan' => $barang->keterangan,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
             }
 
+            // 3) Simpan transaksi (catatan jumlah yang keluar untuk kemudian bisa dilakukan koreksi)
             DB::table('atk_transaksi')->insert([
                 'tanggal' => now()->toDateString(),
                 'jenis' => 'keluar',
-                'jumlah' => $request->jumlah,
+                'jumlah' => $qty,
                 'keterangan' => 'Transfer ke: ' . $request->keterangan,
                 'id_barang' => $idBarangKeluar,
                 'created_at' => now(),
@@ -275,7 +319,7 @@ class AtkController extends Controller
         }
 
         return redirect()->route('ga.atk.barangKeluarForm')
-            ->with('success', $request->jumlah . ' ' . $barang->satuan . ' ' . $barang->nama_barang . ' berhasil dikeluarkan.');
+            ->with('success', $qty . ' ' . $barang->satuan . ' ' . $barang->nama_barang . ' berhasil dikeluarkan.');
     }
 
     public function riwayatItem(int $id)
@@ -318,11 +362,123 @@ class AtkController extends Controller
         return view('ga.atk.riwayat', compact('transaksi'));
     }
 
+    public function updateTransaksi(Request $request, int $id)
+    {
+        $request->validate([
+            'jumlah' => 'required|integer|min:1',
+        ]);
+
+        $transaksi = DB::table('atk_transaksi')->where('id', $id)->first();
+        if (!$transaksi) {
+            return back()->with('error', 'Transaksi tidak ditemukan.');
+        }
+
+        $newJumlah = (int) $request->jumlah;
+        $oldJumlah = (int) $transaksi->jumlah;
+        $delta = $newJumlah - $oldJumlah;
+
+        if ($delta === 0) {
+            return back()->with('info', 'Tidak ada perubahan jumlah.');
+        }
+
+        $barangKeluar = DB::table('atk_katalog')->where('id', $transaksi->id_barang)->first();
+        if (!$barangKeluar) {
+            return back()->with('error', 'Barang keluar terkait transaksi tidak ditemukan.');
+        }
+
+        $barangMasuk = DB::table('atk_katalog')
+            ->where('kode', $barangKeluar->kode)
+            ->where('status_barang', 'Masuk')
+            ->first();
+
+        if ($delta > 0) {
+            // Jumlah bertambah: stok Masuk berkurang, stok Keluar bertambah
+            if ($barangMasuk && (int) $barangMasuk->jumlah < $delta) {
+                return back()->with('error', 'Stok Masuk tidak mencukupi untuk penambahan jumlah. Sisa stok: ' . $barangMasuk->jumlah)->withInput();
+            }
+
+            if ($barangMasuk) {
+                DB::table('atk_katalog')->where('id', $barangMasuk->id)->update([
+                    'jumlah' => (int) $barangMasuk->jumlah - $delta,
+                    'updated_at' => now(),
+                ]);
+            }
+
+            DB::table('atk_katalog')->where('id', $barangKeluar->id)->update([
+                'jumlah' => (int) $barangKeluar->jumlah + $delta,
+                'updated_at' => now(),
+            ]);
+        } else {
+            // Jumlah berkurang: stok Keluar berkurang, stok Masuk kembali bertambah
+            $negDelta = abs($delta);
+
+            if ((int) $barangKeluar->jumlah < $negDelta) {
+                return back()->with('error', 'Jumlah keluar saat ini tidak cukup untuk dikurangi. Stok Keluar: ' . $barangKeluar->jumlah)->withInput();
+            }
+
+            DB::table('atk_katalog')->where('id', $barangKeluar->id)->update([
+                'jumlah' => (int) $barangKeluar->jumlah - $negDelta,
+                'updated_at' => now(),
+            ]);
+
+            if ($barangMasuk) {
+                DB::table('atk_katalog')->where('id', $barangMasuk->id)->update([
+                    'jumlah' => (int) $barangMasuk->jumlah + $negDelta,
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        DB::table('atk_transaksi')->where('id', $id)->update([
+            'jumlah' => $newJumlah,
+        ]);
+
+        return back()->with('success', "Jumlah transaksi berhasil diperbarui dari {$oldJumlah} menjadi {$newJumlah}.");
+    }
+
     public function deleteTransaksi(int $id)
     {
-        DB::table('atk_transaksi')->where('id', $id)->delete();
+        $transaksi = DB::table('atk_transaksi')->where('id', $id)->first();
+        if (!$transaksi) {
+            return back()->with('error', 'Transaksi tidak ditemukan.');
+        }
+
+        DB::beginTransaction();
+        try {
+            // transaksi terkait barang OUT -> kembalikan qty ke katalog MASUK (status Masuk)
+            $barangKeluar = DB::table('atk_katalog')->where('id', $transaksi->id_barang)->first();
+
+            DB::table('atk_transaksi')->where('id', $id)->delete();
+
+            if ($barangKeluar) {
+                $barangMasuk = DB::table('atk_katalog')
+                    ->where('kode', $barangKeluar->kode)
+                    ->where('status_barang', 'Masuk')
+                    ->first();
+
+                if ($barangMasuk) {
+                    DB::table('atk_katalog')->where('id', $barangMasuk->id)->update([
+                        'jumlah' => (int) $barangMasuk->jumlah + (int) $transaksi->jumlah,
+                        'updated_at' => now(),
+                    ]);
+                }
+
+                // kurangi jumlah katalog Keluar sesuai jumlah transaksi yang dihapus
+                DB::table('atk_katalog')->where('id', $barangKeluar->id)->update([
+                    'jumlah' => (int) $barangKeluar->jumlah - (int) $transaksi->jumlah,
+                    'updated_at' => now(),
+                ]);
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+
         return back()->with('success', 'Transaksi berhasil dihapus.');
     }
+
 
     public function exportExcel(Request $request)
     {
@@ -355,8 +511,11 @@ class AtkController extends Controller
         $sheet->mergeCells('A2:J2');
         $sheet->getStyle('A2')->getAlignment()->setHorizontal($Alignment::HORIZONTAL_CENTER);
 
+        // Export tetap menampilkan kolom nilai total (harga * jumlah) dan status barang
         $colHeaders = ['No', 'Kategori', 'Nama Barang', 'Satuan', 'Harga (Rp)', 'Jumlah', 'Jumlah Harga', 'Spesifikasi', 'Keterangan', 'Status Barang'];
+
         $currentRow = 4;
+
 
         $writeSection = function (string $sectionLabel, string $bgSection, string $bgHeader, $rows, float $total, string $totalLabel) use ($sheet, $colHeaders, &$currentRow, $Fill, $Border, $Alignment) {
             $sheet->setCellValue('A' . $currentRow, $sectionLabel);
@@ -479,6 +638,9 @@ class AtkController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Data ATK');
 
+        // Template import ATK:
+        // - kolom 'Jumlah Harga' dihapus
+        // - kolom 'Status Barang' dihapus (default saat import: 'Masuk')
         $headers = [
             'A' => 'No',
             'B' => 'Kategori',
@@ -486,17 +648,19 @@ class AtkController extends Controller
             'D' => 'Satuan',
             'E' => 'Harga (Rp)',
             'F' => 'Jumlah',
-            'G' => 'Jumlah Harga',
-            'H' => 'Spesifikasi',
-            'I' => 'Keterangan',
-            'J' => 'Status Barang',
+            'G' => 'Spesifikasi',
+            'H' => 'Keterangan',
         ];
+
+
+
 
         foreach ($headers as $col => $title) {
             $sheet->setCellValue($col . '1', $title);
         }
 
-        $sheet->getStyle('A1:J1')->applyFromArray([
+            $sheet->getStyle('A1:H1')->applyFromArray([
+
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => [
                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
@@ -513,11 +677,11 @@ class AtkController extends Controller
             'D2' => 'Pcs',
             'E2' => '5000',
             'F2' => '10',
-            'G2' => '50000',
-            'H2' => '',
-            'I2' => '',
-            'J2' => 'Masuk',
+            'G2' => '', // Spesifikasi
+            'H2' => '', // Keterangan
         ];
+
+
         foreach ($example as $cell => $val) {
             $sheet->setCellValue($cell, $val);
         }
@@ -529,16 +693,17 @@ class AtkController extends Controller
             'D' => 10.43,
             'E' => 15.14,
             'F' => 10.43,
-            'G' => 17.56,
-            'H' => 17.56,
-            'I' => 16.43,
-            'J' => 18.71,
+            'G' => 17.56, // Spesifikasi
+            'H' => 17.56, // Keterangan
         ];
+
+
         foreach ($colWidths as $col => $width) {
             $sheet->getColumnDimension($col)->setWidth($width);
         }
 
         $sheet->freezePane('A2');
+
 
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         return response()->streamDownload(
@@ -574,10 +739,12 @@ class AtkController extends Controller
                 'satuan' => ['satuan'],
                 'harga' => ['harga (rp)', 'harga'],
                 'jumlah' => ['jumlah'],
-                'status_barang' => ['status barang', 'status_barang'],
+                // status_barang tidak perlu diinput di template; default saat import
                 'spesifikasi' => ['spesifikasi'],
                 'keterangan' => ['keterangan'],
             ];
+
+
 
             $colMap = [];
             foreach ($fieldMap as $field => $aliases) {
@@ -594,8 +761,9 @@ class AtkController extends Controller
             $seenKey = [];
 
             foreach (array_slice($rows, 1) as $rowNum => $row) {
-                if (empty(array_filter($row)))
+                if (empty(array_filter($row))) {
                     continue;
+                }
 
                 $data = [];
                 foreach ($colMap as $field => $idx) {
@@ -604,7 +772,7 @@ class AtkController extends Controller
 
                 $humanRow = $rowNum + 2;
 
-                if (empty($data['kategori'])) {
+            if (empty($data['kategori'])) {
                     $errors[] = "Baris {$humanRow}: kategori wajib diisi.";
                     continue;
                 }
@@ -642,22 +810,20 @@ class AtkController extends Controller
                     continue;
                 }
 
-                $status = $data['status_barang'] ?? null;
-                if (empty($status)) {
-                    $errors[] = "Baris {$humanRow}: status_barang wajib diisi (Masuk/Keluar).";
-                    continue;
-                }
-                if (!in_array($status, ['Masuk', 'Keluar'], true)) {
-                    $errors[] = "Baris {$humanRow}: status_barang '{$status}' tidak valid (Masuk atau Keluar).";
-                    continue;
-                }
+                // status_barang tidak perlu diinput di template; selalu default Masuk saat import
+                $status = 'Masuk';
 
                 $spesifikasi = $data['spesifikasi'] ?? null;
                 $keterangan = $data['keterangan'] ?? null;
 
-                $key = strtolower(trim($data['kategori'] . '|' . $data['nama_barang'] . '|' . $status));
+
+                // Deduplikasi baris di dalam file agar import tidak double-count
+                $key = strtolower(trim(
+                    ($data['kategori'] ?? '') . '|' . ($data['nama_barang'] ?? '') . '|' . ($data['satuan'] ?? '') . '|' . ($data['harga'] ?? '') . '|' . ($status ?? '') . '|' . (string) ($spesifikasi ?? '') . '|' . (string) ($keterangan ?? '')
+                ));
+
                 if (isset($seenKey[$key])) {
-                    $errors[] = "Baris {$humanRow}: data dengan kategori/nama_barang/status yang sama duplikat di dalam file.";
+                    $errors[] = "Baris {$humanRow}: data dengan identitas barang sama duplikat di dalam file.";
                     continue;
                 }
                 $seenKey[$key] = true;
@@ -690,22 +856,127 @@ class AtkController extends Controller
                 ]);
             }
 
+            // Dedup berdasarkan identitas persis (sesuai permintaan):
+            // kategori, nama_barang, satuan, harga, spesifikasi, keterangan, status_barang
+            $makeKey = static function (array $d): string {
+                return strtolower(trim(
+                    ($d['kategori'] ?? '') . '|' . ($d['nama_barang'] ?? '') . '|' . ($d['satuan'] ?? '') . '|' . (string) ($d['harga'] ?? '') . '|' . (string) ($d['spesifikasi'] ?? '') . '|' . (string) ($d['keterangan'] ?? '') . '|' . ($d['status_barang'] ?? '')
+                ));
+            };
+
+            // 1) Siapkan map key -> total jumlah import
+            $importTotalsByKey = [];
+            foreach ($rowsData as $row) {
+                $k = $makeKey($row);
+                $importTotalsByKey[$k] = ($importTotalsByKey[$k] ?? 0) + (int) ($row['jumlah'] ?? 0);
+            }
+
+            // 2) Ambil kandidat yang mungkin sudah ada dari DB berdasarkan kategori/nama_barang/status
+            $firstRow = $rowsData[0];
+            $kategoriSet = array_values(array_unique(array_map(fn($r) => $r['kategori'], $rowsData)));
+            $namaSet = array_values(array_unique(array_map(fn($r) => $r['nama_barang'], $rowsData)));
+            $statusSet = ['Masuk'];
+
+            $existing = DB::table('atk_katalog')
+                ->whereIn('kategori', $kategoriSet)
+                ->whereIn('nama_barang', $namaSet)
+                ->whereIn('status_barang', $statusSet)
+                ->get();
+
+
+            // 3) Map key -> id untuk yang sudah ada
+            $existingByKey = [];
+            foreach ($existing as $ex) {
+                $key = $makeKey([
+                    'kategori' => $ex->kategori,
+                    'nama_barang' => $ex->nama_barang,
+                    'satuan' => $ex->satuan,
+                    'harga' => $ex->harga,
+                    'spesifikasi' => $ex->spesifikasi,
+                    'keterangan' => $ex->keterangan,
+                    'status_barang' => $ex->status_barang,
+                ]);
+
+                // Jika ternyata ada duplikat lama di DB untuk key yang sama, kita akumulasikan ke baris pertama saja.
+                if (!isset($existingByKey[$key])) {
+                    $existingByKey[$key] = $ex->id;
+                }
+            }
+
             DB::beginTransaction();
             try {
-                foreach ($rowsData as $data) {
-                    DB::table('atk_katalog')->insert([
-                        'kode' => $this->generateKode(),
-                        'kategori' => $data['kategori'],
-                        'nama_barang' => $data['nama_barang'],
-                        'satuan' => $data['satuan'],
-                        'harga' => $data['harga'],
-                        'jumlah' => $data['jumlah'],
-                        'status_barang' => $data['status_barang'],
-                        'spesifikasi' => $data['spesifikasi'],
-                        'keterangan' => $data['keterangan'],
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
+                $createdCount = 0;
+                $updatedCount = 0;
+
+                // Agar kode barang baru unik per insert, kita buat per baris yang benar-benar insert.
+                foreach ($rowsData as $row) {
+                    $k = $makeKey($row);
+
+                    if (isset($existingByKey[$k])) {
+                        $idBarang = $existingByKey[$k];
+                        $qty = (int) ($row['jumlah'] ?? 0);
+
+                        // update jumlah saja (add)
+                        DB::table('atk_katalog')->where('id', $idBarang)->update([
+                            'jumlah' => DB::raw('jumlah + ' . $qty),
+                            'updated_at' => now(),
+                        ]);
+
+                        // Catat transaksi agar riwayat terlacak
+                        DB::table('atk_transaksi')->insert([
+                            'tanggal' => now()->toDateString(),
+                            'jenis' => strtolower((string) $row['status_barang']) === 'masuk' ? 'masuk' : 'keluar',
+                            'jumlah' => $qty,
+                            'keterangan' => $row['keterangan'] ?? '',
+                            'id_barang' => $idBarang,
+                            'created_at' => now(),
+                        ]);
+
+                        $updatedCount++;
+                    } else {
+                        DB::table('atk_katalog')->insert([
+                            'kode' => $this->generateKode(),
+                            'kategori' => $row['kategori'],
+                            'nama_barang' => $row['nama_barang'],
+                            'satuan' => $row['satuan'],
+                            'harga' => $row['harga'],
+                            'jumlah' => $row['jumlah'],
+                            'status_barang' => $row['status_barang'],
+                            'spesifikasi' => $row['spesifikasi'],
+                            'keterangan' => $row['keterangan'],
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+
+                        // Dapatkan id yang baru dibuat untuk transaksi
+                        $newId = DB::table('atk_katalog')
+                            ->where('kategori', $row['kategori'])
+                            ->where('nama_barang', $row['nama_barang'])
+                            ->where('satuan', $row['satuan'])
+                            ->where('harga', $row['harga'])
+                            ->where('status_barang', $row['status_barang'])
+                            ->where('spesifikasi', $row['spesifikasi'])
+                            ->where('keterangan', $row['keterangan'])
+                            ->orderBy('id', 'desc')
+                            ->value('id');
+
+                        if ($newId) {
+                            DB::table('atk_transaksi')->insert([
+                                'tanggal' => now()->toDateString(),
+                                'jenis' => strtolower((string) $row['status_barang']) === 'masuk' ? 'masuk' : 'keluar',
+                                'jumlah' => (int) ($row['jumlah'] ?? 0),
+                                'keterangan' => $row['keterangan'] ?? '',
+                                'id_barang' => $newId,
+                                'created_at' => now(),
+                            ]);
+                        }
+
+                        $createdCount++;
+                        // update map agar baris berikutnya untuk key yang sama di file tidak insert lagi
+                        if ($newId) {
+                            $existingByKey[$k] = $newId;
+                        }
+                    }
                 }
 
                 DB::commit();
@@ -722,6 +993,8 @@ class AtkController extends Controller
                 'success' => true,
                 'title' => 'Import Berhasil',
                 'success_count' => count($rowsData),
+                'created_count' => $createdCount,
+                'updated_count' => $updatedCount,
                 'errors' => [],
             ]);
         } catch (\Exception $e) {

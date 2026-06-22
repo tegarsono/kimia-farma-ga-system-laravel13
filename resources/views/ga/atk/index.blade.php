@@ -92,14 +92,12 @@
                     title="Import data dari Excel">
                     <i class="fas fa-file-import me-1"></i>Import
                 </button>
-                @if(!request('kategori') && !request('search'))
                 <a href="{{ route('ga.atk.exportExcel') }}" class="btn btn-success btn-sm" title="Export data ke Excel">
                     <i class="fas fa-file-export me-1"></i>Export
                 </a>
                 <a href="{{ route('ga.atk.downloadTemplate') }}" class="btn btn-outline-success btn-sm" title="Download template Excel untuk import">
                     <i class="fas fa-file-excel me-1"></i>Template Excel
                 </a>
-                @endif
             </div>
 
             <hr class="my-3">

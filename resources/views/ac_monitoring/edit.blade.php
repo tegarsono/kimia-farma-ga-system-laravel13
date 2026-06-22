@@ -77,8 +77,12 @@
                             </div>
                         </div>
                         <div class="d-flex gap-2 mt-4">
-                            Update
-                            Cancel
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Update
+                            </button>
+                            <a href="{{ route('ac.index') }}" class="btn btn-secondary">
+                                Cancel
+                            </a>
                         </div>
                     </form>
                 </div>

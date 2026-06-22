@@ -144,7 +144,7 @@
                     <i class="fas fa-folder-open"></i> Jumlah Aset DIR per Unit Bisnis
                 </div>
                 <div class="card-body chart-wrapper">
-                    @if(empty($dataDirUnitBisnis['labels']))
+                    @if(empty($dataDirUnitBisnis['labels']) || count($dataDirUnitBisnis['labels']) === 0)
                         <span class="no-data-text">Tidak ada data DIR</span>
                     @else
                         <canvas id="dirUnitBisnisChart"></canvas>

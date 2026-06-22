@@ -104,8 +104,12 @@ class MonitoringController extends Controller
         if (!$item)
             abort(404);
 
-        $itemTypeList = DB::table('tb_monitoring')->distinct()->pluck('jenis_barang');
-        return view('ac_monitoring.edit', compact('item', 'itemTypeList'));
+        $jenisBarangList = DB::table('tb_monitoring')->distinct()->pluck('jenis_barang');
+        return view('ac_monitoring.edit', [
+            'item' => $item,
+            'jenisBarangList' => $jenisBarangList,
+        ]);
+
     }
 
     public function update(Request $request, int $id)
@@ -183,10 +187,7 @@ class MonitoringController extends Controller
         $thresholdDate = now()->subMonths(3)->toDateString();
 
         return DB::table('tb_monitoring')
-            ->where(function ($q) use ($thresholdDate) {
-                $q->where('status', 'Wajib Service')
-                    ->orWhere('tgl_perawatan_terakhir', '<', $thresholdDate);
-            })
+            ->where('status', 'Wajib Service')
             ->orderBy('tgl_perawatan_terakhir');
     }
 
@@ -480,7 +481,7 @@ class MonitoringController extends Controller
                 return response()->json([
                     'success' => false,
                     'title' => 'Import Gagal',
-                    'errors' => [self::simplifyDbError($e->getMessage())],
+                    'errors' => ["Import Gagal — pastikan kolom 'status' hanya bernilai 'Normal' atau 'Wajib Service'."],
                 ]);
             }
 

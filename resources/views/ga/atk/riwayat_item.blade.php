@@ -58,15 +58,26 @@
                             <td>{{ $trans->keterangan }}</td>
                             <td class="text-center fw-bold">{{ $trans->jumlah }}</td>
                             <td class="text-center">
+                                <form method="POST" action="{{ route('ga.atk.updateTransaksi', $trans->id) }}" class="d-inline">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="number" name="jumlah" min="1" step="1" class="form-control form-control-sm d-inline-block" style="width:90px"
+                                        value="{{ $trans->jumlah }}" required>
+                                    <button class="btn btn-sm btn-primary ms-1" title="Simpan edit nominal" type="submit" style="line-height:1">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                </form>
+
                                 <form method="POST" action="{{ route('ga.atk.deleteTransaksi', $trans->id) }}"
-                                    class="d-inline"
+                                    class="d-inline ms-1"
                                     onsubmit="return confirm('Hapus transfer ini? Stok Masuk akan dikembalikan.')">
                                     @csrf @method('DELETE')
-                                    <button class="btn btn-sm btn-danger" title="Hapus">
+                                    <button class="btn btn-sm btn-danger" title="Hapus" style="line-height:1">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
                             </td>
+
                         </tr>
                         @endforeach
                     </tbody>

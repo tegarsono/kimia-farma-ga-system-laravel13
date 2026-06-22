@@ -703,12 +703,13 @@
                                 Barang Keluar
                             </a>
                         </li>
-                        <li class="nav-item">
+                        {{-- Riwayat Transaksi ATK di-hide di sidebar --}}
+                        {{-- <li class="nav-item">
                             <a href="{{ route('ga.atk.riwayat') }}"
                                 class="{{ request()->routeIs('ga.atk.riwayat') ? 'active-link' : '' }}">
                                 Riwayat Transaksi
                             </a>
-                        </li>
+                        </li> --}}
                     </ul>
                 </div>
             </li>

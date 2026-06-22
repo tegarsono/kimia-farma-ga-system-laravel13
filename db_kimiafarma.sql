@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 22 Jun 2026 pada 15.21
+-- Waktu pembuatan: 22 Jun 2026 pada 18.17
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.5.7
 
@@ -87,7 +87,8 @@ CREATE TABLE `dir_aset` (
 INSERT INTO `dir_aset` (`id`, `cost_center`, `profit_center`, `unit_bisnis`, `golongan_aset`, `kategori_aset`, `deskripsi_aset`, `lokasi_pemakai`, `kode_aset`, `id_aset`, `keterangan`, `created_at`, `updated_at`) VALUES
 (8, 'CC001', 'PC001', 'General Affair', 'Elektronik', 'Laptop', 'Laptop Dell Latitude 5440', 'Divisi IT', 'AST-001', '1.002.3000.002', 'Digunakan untuk operasional staf IT', '2026-06-21 20:37:41', '2026-06-21 20:37:41'),
 (9, 'CC002', 'PC002', 'Operasional', 'Kendaraan', 'Sepeda Motor', 'Honda Vario 160', 'Bagian Logistik', 'AST-002', '1.003.3000.003', 'Kendaraan operasional pengiriman dokumen', '2026-06-21 20:37:41', '2026-06-21 20:37:41'),
-(10, 'CC003', 'PC003', 'Keuangan', 'Peralatan Kantor', 'Printer', 'Epson L3250', 'Ruang Finance', 'AST-003', '1.004.3000.004', 'Printer untuk kebutuhan administrasi dan laporan', '2026-06-21 20:37:41', '2026-06-21 20:37:41');
+(10, 'CC003', 'PC003', 'Keuangan', 'Peralatan Kantor', 'Printer', 'Epson L3250', 'Ruang Finance', 'AST-003', '1.004.3000.004', 'Printer untuk kebutuhan administrasi dan laporan', '2026-06-21 20:37:41', '2026-06-21 20:37:41'),
+(11, '2000', '3000', 'Unit Bisnis Banjarmasin', 'asdjksa', 'asdas', 'asda', 'asdhsa', 'ahsdoisa', '1.005.3000.005', 'adksaj', '2026-06-22 09:12:22', '2026-06-22 09:12:32');
 
 -- --------------------------------------------------------
 
@@ -197,8 +198,8 @@ CREATE TABLE `mobil` (
 --
 
 INSERT INTO `mobil` (`id_mobil`, `merk`, `plat_nomor`, `tipe_mobil`) VALUES
-(1, 'Toyota Dyna Box', 'B 9012 KFA', 'Mobil Box Pendingin'),
-(2, 'Isuzu Elf', 'B 4432 KFB', 'Truck Engkel');
+(2, 'Isuzu Elf', 'B 4432 KFB', 'Truck Engkel'),
+(3, 'toyota', 'B 21638 F', 'Box');
 
 -- --------------------------------------------------------
 
@@ -307,7 +308,8 @@ CREATE TABLE `riwayat_jadwal` (
 --
 
 INSERT INTO `riwayat_jadwal` (`id_jadwal`, `id_supir`, `id_mobil`, `tanggal_tugas`, `created_at`, `jam_mulai`, `jam_selesai`, `penumpang`, `tujuan`, `keperluan`) VALUES
-(5, 1, 1, '2026-05-24', '2026-05-24 11:15:25', '18:14:00', '20:00:00', 'mbuh', 'MENARA TERATAI', 'rapat');
+(5, 1, 1, '2026-05-24', '2026-05-24 11:15:25', '18:14:00', '20:00:00', 'mbuh', 'MENARA TERATAI', 'rapat'),
+(6, 3, 1, '2026-06-22', '2026-06-22 08:19:54', '22:19:00', '23:00:00', 'adjsakdnsa', 'asdikasdoas', 'kasldasasdsa');
 
 -- --------------------------------------------------------
 
@@ -359,8 +361,8 @@ CREATE TABLE `supir` (
 --
 
 INSERT INTO `supir` (`id_supir`, `nama_supir`, `status`, `nip`) VALUES
-(1, 'Ahmad Subarjo', 'idle', ''),
-(3, 'Siti Aminah', 'idle', '');
+(6, 'asdhsaodiasoi', 'idle', '12938128321'),
+(7, 'asdsa', 'idle', '31231242143');
 
 -- --------------------------------------------------------
 
@@ -388,6 +390,15 @@ CREATE TABLE `tanah_bangunan_aset` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Tabel data aset properti tanah dan bangunan Kimia Farma';
 
+--
+-- Dumping data untuk tabel `tanah_bangunan_aset`
+--
+
+INSERT INTO `tanah_bangunan_aset` (`id`, `kode_sap`, `no_asset_tanah`, `branch_manager`, `digunakan_sebagai`, `penggunaan`, `no_posisi_gedung`, `alamat`, `luas_tanah`, `luas_bangunan`, `tahun_perolehan`, `nomor_sertifikat_baru`, `masa_berlaku`, `status`, `keterangan`, `created_at`, `updated_at`) VALUES
+(122, 'SAP-100293', 'AST-001923', 'Surabaya', 'Kantor Cabang', 'Operasional', 'G-01', 'Jl. Raya Darmo No. 45, Surabaya', 500.00, 350.00, '2015', 'SHM No. 12345/Surabaya', NULL, 'Milik Sendiri', 'Kondisi baik, digunakan penuh.', '2026-06-22 08:54:32', '2026-06-22 08:54:32'),
+(123, 'SAP-100294', 'AST-001924', 'Bandung', 'Gudang Logistik', 'Penyimpanan', 'G-02', 'Jl. Soekarno Hatta No. 102, Bandung', 1200.00, 800.00, '2018', 'SHGB No. 6789/Bandung', '2038-12-31', 'Hak Guna Bangunan', 'Atap memerlukan sedikit perbaikan.', '2026-06-22 08:54:32', '2026-06-22 08:54:32'),
+(124, 'SAP-100295', 'AST-001925', 'Kantor Pusat', 'Gedung Kantor', 'Utama', 'G-03', 'Jl. MH Thamrin No. 21, Jakarta', 2500.00, 4500.00, '2010', 'SHM No. 98765/Jakarta', NULL, 'Milik Sendiri', 'Gedung Utama Pusat, 5 lantai.', '2026-06-22 08:54:32', '2026-06-22 08:54:32');
+
 -- --------------------------------------------------------
 
 --
@@ -410,8 +421,11 @@ CREATE TABLE `tb_monitoring` (
 --
 
 INSERT INTO `tb_monitoring` (`id`, `kode_ga`, `lokasi`, `tgl_perawatan_terakhir`, `keterangan`, `status`, `nama_barang`, `jenis_barang`) VALUES
-(10, 'GA-001', 'Hotel oyo', '2026-05-24', 'MBUH', 'Normal', 'AC PANASONIC', 'AC'),
-(11, 'GA-001', 'Hotel oyo', '2026-05-24', 'MBUH', 'Normal', 'AC PANASONIC', 'AC');
+(20, 'AC-101', 'Kantor Admin', '2025-11-13', 'Perawatan rutin ke-1', 'Normal', 'Samsung', 'AC'),
+(21, 'AC-102', 'Ruang Meeting', '2026-03-11', 'Perawatan rutin ke-2', 'Wajib Service', 'Panasonic', 'AC'),
+(22, 'AC-103', 'Ruang Server', '2025-10-16', 'Perawatan rutin ke-3', 'Wajib Service', 'Daikin', 'AC'),
+(23, 'AC-104', 'Lobby', '2025-11-18', 'Perawatan rutin ke-4', 'Normal', 'Sharp', 'AC'),
+(24, 'AC-105', 'Ruang Server', '2026-01-17', 'Perawatan rutin ke-5', 'Wajib Service', 'Panasonic', 'AC');
 
 -- --------------------------------------------------------
 
@@ -436,7 +450,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `full_name`, `role`, `last_login`, `status`, `created_at`) VALUES
-(1, 'adminkfa', 'kimiafarma@gmail.com', '$2y$10$jQG3DS7sBHqOQR4qjW6MkOje2mD1X2E7ny27Uou.7g9RQVljTbrXG', 'Administrator GA', 'admin', '2026-06-22 13:20:53', 'active', '2026-02-04 10:01:31'),
+(1, 'adminkfa', 'kimiafarma@gmail.com', '$2y$12$niJpVZoDVRfOZX3RD/rUTu72RFsy2I82cnHKCEtziSuIlOk1Bz7Qe', 'Administrator GA', 'admin', '2026-06-22 15:34:09', 'active', '2026-02-04 10:01:31'),
 (3, 'rendi12', 'asdnasndsa@gmail.com', '$2y$12$1s4dX3HF0LUojjrDKD3yAOtvqHBunEAb4U.79xzwXOfLW66RjjRQi', 'aksdbkjsadsnjk', 'user', '2026-06-22 08:21:01', 'active', '2026-06-22 08:11:38');
 
 --
@@ -594,7 +608,7 @@ ALTER TABLE `atk_transaksi`
 -- AUTO_INCREMENT untuk tabel `dir_aset`
 --
 ALTER TABLE `dir_aset`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT untuk tabel `image_settings`
@@ -606,13 +620,13 @@ ALTER TABLE `image_settings`
 -- AUTO_INCREMENT untuk tabel `jadwal`
 --
 ALTER TABLE `jadwal`
-  MODIFY `id_jadwal` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_jadwal` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT untuk tabel `kendaraan_aset`
 --
 ALTER TABLE `kendaraan_aset`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=131;
 
 --
 -- AUTO_INCREMENT untuk tabel `migrations`
@@ -624,7 +638,7 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT untuk tabel `mobil`
 --
 ALTER TABLE `mobil`
-  MODIFY `id_mobil` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_mobil` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT untuk tabel `permissions`
@@ -642,19 +656,19 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT untuk tabel `supir`
 --
 ALTER TABLE `supir`
-  MODIFY `id_supir` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_supir` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT untuk tabel `tanah_bangunan_aset`
 --
 ALTER TABLE `tanah_bangunan_aset`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=122;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=126;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_monitoring`
 --
 ALTER TABLE `tb_monitoring`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`

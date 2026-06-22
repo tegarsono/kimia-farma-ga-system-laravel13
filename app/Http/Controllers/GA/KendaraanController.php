@@ -565,6 +565,23 @@ class KendaraanController extends Controller
                     $data[$field] = isset($row[$idx]) && $row[$idx] !== '' ? trim((string) $row[$idx]) : null;
                 }
 
+                // Normalisasi status agar toleran terhadap spasi
+                if (isset($data['status']) && $data['status'] !== null) {
+                    $data['status'] = trim((string) $data['status']);
+                }
+
+                // Validasi status (harus salah satu dari daftar yang diizinkan)
+                if (!empty($data['status']) && !in_array($data['status'], $this->statusList, true)) {
+                    $errors[] = "Baris " . ($rowNum + 2) . ": status tidak valid. Hanya boleh: " . implode(', ', $this->statusList) . ".";
+                    continue;
+                }
+
+                // Validasi jenis_kendaraan hanya boleh Mobil atau Motor
+                if (!empty($data['jenis_kendaraan']) && !in_array($data['jenis_kendaraan'], ['Mobil', 'Motor'], true)) {
+                    $errors[] = "Baris " . ($rowNum + 2) . ": jenis_kendaraan tidak valid. Hanya boleh: Mobil atau Motor.";
+                    continue;
+                }
+
                 if (empty($data['no_posisi']) || empty($data['branch_manager']) || empty($data['merk'])) {
                     $errors[] = "Baris " . ($rowNum + 2) . ": No Posisi, Bisnis Manager, dan Merk wajib diisi.";
                     continue;

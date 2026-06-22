@@ -38,24 +38,11 @@
         {{-- Filter --}}
         <div class="card-body pb-0">
             <form method="GET" class="row g-2 mb-3">
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-8">
                     <input type="text" name="search" class="form-control form-control-sm"
-                        placeholder="Cari kode aset, deskripsi, pemilik, lokasi..." value="{{ request('search') }}">
+                        placeholder="Cari dari kata (kode aset, deskripsi, lokasi, unit bisnis, kategori...)" value="{{ request('search') }}">
                 </div>
-                <div class="col-6 col-md-3">
-                    <input type="text" name="kode_aset" class="form-control form-control-sm" placeholder="Kode Aset"
-                        value="{{ request('kode_aset') }}">
-                </div>
-                <div class="col-6 col-md-2">
-                    <input type="text" name="unit_bisnis" class="form-control form-control-sm" placeholder="Unit Bisnis"
-                        value="{{ request('unit_bisnis') }}">
-                </div>
-                <div class="col-12 col-md-3">
-                    <input type="text" name="kategori_aset" class="form-control form-control-sm" placeholder="Kategori Aset"
-                        value="{{ request('kategori_aset') }}">
-                </div>
-
-                <div class="col-12 col-md-3 d-flex gap-2">
+                <div class="col-12 col-md-4 d-flex gap-2">
                     <button class="btn btn-sm btn-primary w-100"><i class="fas fa-search me-1"></i>Filter</button>
                     <a href="{{ route('ga.dir.index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
                 </div>

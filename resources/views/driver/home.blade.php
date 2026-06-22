@@ -110,9 +110,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span><i class="fas fa-calendar-day me-2 text-primary"></i>Jadwal Hari Ini —
-                        {{ \Carbon\Carbon::parse($tanggalHariIni)->translatedFormat('dddd, j F Y') }}</span>
-                    <a href="{{ route('driver.jadwal.create') }}" class="btn btn-sm btn-light text-primary fw-semibold"><i
-                            class="fas fa-plus me-1"></i>Buat Jadwal</a>
+{{ \Carbon\Carbon::parse($tanggalHariIni)->locale('id')->translatedFormat('l, d F Y') }}
                 </div>
                 <div class="card-body">
                     @forelse($jadwalHariIni as $j)

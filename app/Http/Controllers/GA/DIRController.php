@@ -198,6 +198,7 @@ class DIRController extends Controller
                     ->orWhere('unit_bisnis', 'like', $s)
                     ->orWhere('kategori_aset', 'like', $s)
                     ->orWhere('golongan_aset', 'like', $s)
+                    ->orWhere('deskripsi_aset', 'like', $s)
                     ->orWhere('profit_center', 'like', $s)
                     ->orWhere('cost_center', 'like', $s)
                     ->orWhere('id_aset', 'like', $s)
@@ -558,50 +559,31 @@ class DIRController extends Controller
         ]);
     }
 
-    private function buildDirIndexQuery(Request $request)
-    {
-        $query = DB::table('dir_aset');
+        private function buildDirIndexQuery(Request $request)
+        {
+            $query = DB::table('dir_aset');
 
-        $search = (string) ($request->search ?? '');
-        if ($search !== '') {
-            $s = '%' . $search . '%';
-            $query->where(function ($q) use ($s) {
-                $q->where('kode_aset', 'like', $s)
-                    ->orWhere('deskripsi_aset', 'like', $s)
-                    ->orWhere('pemilik', 'like', $s)
-                    ->orWhere('lokasi_pemakai', 'like', $s)
-                    ->orWhere('unit_bisnis', 'like', $s)
-                    ->orWhere('kategori_aset', 'like', $s)
-                    ->orWhere('golongan_aset', 'like', $s)
-                    ->orWhere('profit_center', 'like', $s)
-                    ->orWhere('cost_center', 'like', $s)
-                    ->orWhere('id_aset', 'like', $s)
-                    ->orWhere('keterangan', 'like', $s);
-            });
+            $search = (string) ($request->search ?? '');
+            if ($search !== '') {
+                $s = '%' . $search . '%';
+                $query->where(function ($q) use ($s) {
+                    $q->where('kode_aset', 'like', $s)
+                        ->orWhere('deskripsi_aset', 'like', $s)
+                        ->orWhere('lokasi_pemakai', 'like', $s)
+                        ->orWhere('unit_bisnis', 'like', $s)
+                        ->orWhere('kategori_aset', 'like', $s)
+                        // bantu match kategori_aset agar case-insensitive
+                        ->orWhereRaw('LOWER(kategori_aset) LIKE ?', [strtolower($s)])
+                        ->orWhere('golongan_aset', 'like', $s)
+                        ->orWhere('profit_center', 'like', $s)
+                        ->orWhere('cost_center', 'like', $s)
+                        ->orWhere('id_aset', 'like', $s)
+                        ->orWhere('keterangan', 'like', $s);
+                });
+            }
+
+            return $query;
         }
-
-        $kode_aset = (string) ($request->kode_aset ?? '');
-        if ($kode_aset !== '') {
-            $query->where('kode_aset', $kode_aset);
-        }
-
-        $unit_bisnis = (string) ($request->unit_bisnis ?? '');
-        if ($unit_bisnis !== '') {
-            $query->where('unit_bisnis', $unit_bisnis);
-        }
-
-        $kategori_aset = (string) ($request->kategori_aset ?? '');
-        if ($kategori_aset !== '') {
-            $query->where('kategori_aset', $kategori_aset);
-        }
-
-        $tahun = (string) ($request->tahun ?? '');
-        if ($tahun !== '') {
-            $query->where('tahun', $tahun);
-        }
-
-        return $query;
-    }
 
 
     public function create()
@@ -628,8 +610,8 @@ class DIRController extends Controller
         $validated['id_aset'] = $this->generateIdAsetNext();
 
         DB::table('dir_aset')->insert(array_merge($validated, [
-            'created_at' => Now::now(),
-            'updated_at' => Now::now(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]));
 
         return Redirect::route('ga.dir.index')->with('success', 'Data DIR berhasil ditambahkan.');
@@ -669,7 +651,7 @@ class DIRController extends Controller
 
         DB::table('dir_aset')->where('id', $id)->update(array_merge($validated, [
             'id_aset' => $item->id_aset,
-            'updated_at' => Now::now(),
+            'updated_at' => now(),
         ]));
 
         return Redirect::route('ga.dir.index')->with('success', 'Data DIR berhasil diperbarui.');

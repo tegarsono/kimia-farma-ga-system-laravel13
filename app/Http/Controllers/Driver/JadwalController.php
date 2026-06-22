@@ -31,9 +31,9 @@ class JadwalController extends Controller
 
     public function create()
     {
-        $drivers = DB::table('supir')->where('status', '!=', 'offline')->get();
-        $cars    = DB::table('mobil')->get();
-        return view('driver.jadwal.create', compact('drivers', 'cars'));
+        $supir = DB::table('supir')->where('status', '!=', 'offline')->get();
+        $mobil = DB::table('mobil')->get();
+        return view('driver.jadwal.create', compact('supir', 'mobil'));
     }
 
     public function store(Request $request)
@@ -129,6 +129,12 @@ class JadwalController extends Controller
         return redirect()->route('driver.jadwal.index')->with('success', 'Jadwal berhasil dihapus.');
     }
 
+    // Alias untuk route: /driver/jadwal/{id}/selesai
+    public function selesai(Request $request, int $id)
+    {
+        return $this->complete($request, $id);
+    }
+
     public function complete(Request $request, int $id)
     {
         $schedule = DB::table('jadwal')->where('id_jadwal', $id)->first();
@@ -151,6 +157,12 @@ class JadwalController extends Controller
         return redirect()->route('driver.jadwal.index')->with('success', 'Jadwal selesai dan dipindahkan ke riwayat.');
     }
 
+    // Alias route: /driver/jadwal/riwayat
+    public function riwayat(Request $request)
+    {
+        return $this->history($request);
+    }
+
     public function history(Request $request)
     {
         $query = DB::table('riwayat_jadwal as r')
@@ -167,7 +179,14 @@ class JadwalController extends Controller
 
         $history = $query->orderBy('r.tanggal_tugas', 'desc')->paginate(20)->withQueryString();
 
-        return view('driver.jadwal.riwayat', compact('history'));
+        // blade riwayat menggunakan variabel $riwayat
+        return view('driver.jadwal.riwayat', ['riwayat' => $history]);
+    }
+
+    // Alias route: /driver/jadwal/riwayat/pdf
+    public function riwayatPdf(Request $request)
+    {
+        return $this->historyPdf($request);
     }
 
     public function historyPdf(Request $request)
@@ -183,7 +202,7 @@ class JadwalController extends Controller
         }
 
         $history = $query->orderBy('r.tanggal_tugas')->get();
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('driver.jadwal.riwayat_pdf', compact('history'));
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('driver.jadwal.riwayat_pdf', ['riwayat' => $history]);
         $pdf->setPaper('A4', 'landscape');
         return $pdf->download('riwayat_jadwal_' . date('Ymd_His') . '.pdf');
     }

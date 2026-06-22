@@ -41,7 +41,9 @@
                                         class="text-danger">*</span></label>
                                 <select name="jenis_kendaraan" class="form-select" required>
                                     <option value="">-- Pilih --</option>
-                                    @foreach($jenisKendaraanList as $j)<option value="{{ $j }}" {{ old('jenis_kendaraan') == $j ? 'selected' : '' }}>{{ $j }}</option>@endforeach
+                                    @foreach(['Mobil','Motor'] as $j)
+                                        <option value="{{ $j }}" {{ old('jenis_kendaraan') == $j ? 'selected' : '' }}>{{ $j }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="col-md-4">

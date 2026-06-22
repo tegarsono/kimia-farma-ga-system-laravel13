@@ -36,8 +36,10 @@ class SupirController extends Controller
 
     public function create()
     {
-        return view('driver.drivers.create');
+        // Blade yang tersedia: resources/views/driver/supir/create.blade.php
+        return view('driver.supir.create');
     }
+
 
     public function store(Request $request)
     {
@@ -54,7 +56,7 @@ class SupirController extends Controller
         ]);
 
         return redirect()
-            ->route('driver.drivers.index')
+            ->route('driver.supir.index')
             ->with('success', 'Driver data has been added successfully.');
     }
 
@@ -68,7 +70,9 @@ class SupirController extends Controller
             abort(404);
         }
 
-        return view('driver.drivers.edit', compact('driver'));
+        // view yang tersedia pada project ini: driver/supir/edit.blade.php
+        // Kirim variabel yang sesuai dengan blade: $supir
+        return view('driver.supir.edit', ['supir' => $driver]);
     }
 
     public function update(Request $request, int $driverId)
@@ -88,7 +92,7 @@ class SupirController extends Controller
             ]);
 
         return redirect()
-            ->route('driver.drivers.index')
+            ->route('driver.supir.index')
             ->with('success', 'Driver data has been updated successfully.');
     }
 
@@ -110,7 +114,7 @@ class SupirController extends Controller
             ->delete();
 
         return redirect()
-            ->route('driver.drivers.index')
+            ->route('driver.supir.index')
             ->with('success', 'Driver data has been deleted successfully.');
     }
 }

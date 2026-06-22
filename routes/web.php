@@ -117,6 +117,8 @@ Route::prefix('ga')->name('ga.')->middleware('permission_or_role:visit.ga.home')
             Route::get('/riwayat', [AtkController::class, 'riwayat'])->middleware('permission_or_role:visit.ga.atk.riwayat')->name('riwayat');
 
             Route::delete('/transaksi/{id}', [AtkController::class, 'deleteTransaksi'])->name('deleteTransaksi');
+            Route::put('/transaksi/{id}', [AtkController::class, 'updateTransaksi'])->name('updateTransaksi');
+
             Route::get('/export-excel', [AtkController::class, 'exportExcel'])->name('exportExcel');
             Route::get('/export-pdf-stok', [AtkController::class, 'exportPdfStok'])->name('exportPdfStok');
             Route::get('/download-template', [AtkController::class, 'downloadTemplate'])->name('downloadTemplate');

@@ -41,7 +41,7 @@
                                 <label class="form-label fw-semibold">Jenis Kendaraan <span
                                         class="text-danger">*</span></label>
                                 <select name="jenis_kendaraan" class="form-select" required>
-                                    @foreach($jenisKendaraanList as $j)
+                                    @foreach(['Mobil','Motor'] as $j)
                                         <option value="{{ $j }}" {{ old('jenis_kendaraan', $kendaraan->jenis_kendaraan) == $j ? 'selected' : '' }}>{{ $j }}
                                         </option>
                                     @endforeach
