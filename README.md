@@ -45,7 +45,7 @@ Konversi lengkap dari **PHP Native** ke **Laravel 13** untuk sistem manajemen Ge
 
 Pastikan sistem Anda telah terinstall:
 
-- **PHP** 8.2 atau lebih tinggi
+- **PHP** 8.3 atau lebih tinggi
 - **Composer** (package manager PHP)
 - **MySQL** 8.0+ / MariaDB 10.6+
 - **Node.js** (untuk asset build dengan Vite)
