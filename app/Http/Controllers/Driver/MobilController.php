@@ -50,9 +50,9 @@ class MobilController extends Controller
 
     public function edit(int $id)
     {
-        $car = DB::table('mobil')->where('id_mobil', $id)->first();
-        if (!$car) abort(404);
-        return view('driver.mobil.edit', compact('car'));
+        $mobil = DB::table('mobil')->where('id_mobil', $id)->first();
+        if (!$mobil) abort(404);
+        return view('driver.mobil.edit', compact('mobil'));
     }
 
     public function update(Request $request, int $id)
