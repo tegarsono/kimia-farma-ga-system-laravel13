@@ -11,7 +11,7 @@ Konversi lengkap dari **PHP Native** ke **Laravel 13** untuk sistem manajemen Ge
 - Reset password via OTP ke email (6 digit, berlaku 15 menit)
 - Manajemen profil & ganti password
 - Middleware session-based (tanpa Laravel Auth bawaan)
-- Role: `admin`, `staff`, `manager`
+- Role: `admin`, `user`
 
 ### 🏢 General Affair (GA)
 - **Dashboard** dengan grafik Chart.js (kendaraan per branch, tanah & bangunan, tren ATK)
@@ -75,6 +75,15 @@ php artisan key:generate
 
 # Buat symlink storage untuk file upload
 php artisan storage:link
+```
+
+### 3.1. Publish Spatie Permission (Role & Permission)
+
+Package `spatie/laravel-permission` memerlukan publish konfigurasi dan migration:
+
+```bash
+# Publish konfigurasi dan migration spatie permission
+php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
 ```
 
 ### 4. Konfigurasi Database
@@ -176,6 +185,12 @@ php artisan optimize:clear
 | Password | `admin123`               |
 | Role     | `admin`                  |
 
+**User tambahan di database:**
+
+| Username | Email                    | Password (hash) | Role  |
+|----------|--------------------------|-----------------|-------|
+| `rendi12`| `asdnasndsa@gmail.com`   | *(hash bcrypt)* | `user` |
+
 > ⚠️ **Ganti password setelah login pertama!**
 
 ---
@@ -235,7 +250,7 @@ kimiafarmalaravel13/
 | `laravel/framework` | ^13.0 | Core framework Laravel |
 | `barryvdh/laravel-dompdf` | ^3.1 | Generate PDF |
 | `phpoffice/phpspreadsheet` | ^5.8 | Import/Export Excel |
-| `spatie/laravel-permission` | ^6.25 | Manajemen role & permission |
+| `spatie/laravel-permission` | ^6.25 | Manajemen role & permission (menggunakan tabel `roles`, `permissions`, `model_has_roles`, `model_has_permissions`, `role_has_permissions`) |
 | `laravel/tinker` | ^3.0 | REPL interaktif untuk debugging |
 
 ### PHP (Composer) — Development
@@ -267,21 +282,26 @@ kimiafarmalaravel13/
 
 ## 🗄️ Tabel Database
 
-| Tabel               | Fungsi                           |
-|---------------------|----------------------------------|
-| `users`             | Data pengguna sistem             |
-| `password_resets`   | Token OTP reset password         |
-| `image_settings`    | Konfigurasi gambar/logo sistem   |
-| `kendaraan_aset`    | Aset kendaraan GA                |
-| `tanah_bangunan_aset`| Aset tanah dan bangunan         |
-| `atk_katalog`       | Katalog barang ATK               |
-| `atk_transaksi`     | Riwayat transaksi ATK keluar     |
-| `biaya_umum`        | Pencatatan biaya operasional     |
-| `tb_monitoring`     | Monitoring maintenance           |
-| `mobil`             | Data armada kendaraan operasional|
-| `supir`             | Data supir/driver                |
-| `jadwal`            | Jadwal tugas driver aktif        |
-| `riwayat_jadwal`    | Riwayat perjalanan selesai       |
+| Tabel | Fungsi |
+|-------|--------|
+| `users` | Data pengguna sistem (role: `admin`/`user`) |
+| `password_resets` | Token OTP reset password |
+| `image_settings` | Konfigurasi gambar/logo sistem |
+| `kendaraan_aset` | Aset kendaraan GA |
+| `tanah_bangunan_aset` | Aset tanah dan bangunan |
+| `atk_katalog` | Katalog barang ATK |
+| `atk_transaksi` | Riwayat transaksi ATK keluar |
+| `biaya_umum` | Pencatatan biaya operasional |
+| `tb_monitoring` | Monitoring maintenance |
+| `mobil` | Data armada kendaraan operasional |
+| `supir` | Data supir/driver |
+| `jadwal` | Jadwal tugas driver aktif |
+| `riwayat_jadwal` | Riwayat perjalanan selesai |
+| `permissions` | Daftar permission (spatie) — 14 permissions |
+| `roles` | Daftar role (spatie) — role `admin` |
+| `model_has_permissions` | Relasi permission-user (spatie) |
+| `model_has_roles` | Relasi role-user (spatie) |
+| `role_has_permissions` | Relasi role-permission (spatie) |
 
 ---
 
