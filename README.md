@@ -39,36 +39,47 @@ Konversi lengkap dari **PHP Native** ke **Laravel 13** untuk sistem manajemen Ge
 
 ---
 
-## 🚀 Instalasi
+## 🚀 Instalasi & Menjalankan Proyek
 
 ### 1. Prasyarat
-- PHP 8.2+
-- Composer
-- MySQL 8.0+ / MariaDB 10.6+
-- Node.js (opsional, untuk asset build)
 
-### 2. Clone & Install
+Pastikan sistem Anda telah terinstall:
+
+- **PHP** 8.2 atau lebih tinggi
+- **Composer** (package manager PHP)
+- **MySQL** 8.0+ / MariaDB 10.6+
+- **Node.js** (untuk asset build dengan Vite)
+- **Git** (opsional, untuk clone repository)
+
+### 2. Clone & Install Dependencies
 
 ```bash
 # Masuk ke direktori project
-cd kimiafarma-laravel
+cd kimiafarmalaravel13
 
-# Install dependencies
+# Install dependencies PHP (Composer)
 composer install
 
-# Salin file konfigurasi
+# Install dependencies Node.js (untuk frontend assets)
+npm install
+```
+
+### 3. Konfigurasi Environment
+
+```bash
+# Salin file konfigurasi environment
 cp .env.example .env
 
-# Generate app key
+# Generate application key
 php artisan key:generate
 
-# Link storage untuk file upload
+# Buat symlink storage untuk file upload
 php artisan storage:link
 ```
 
-### 3. Konfigurasi Database
+### 4. Konfigurasi Database
 
-Edit file `.env`:
+Edit file `.env` sesuai dengan konfigurasi database lokal Anda:
 
 ```env
 DB_CONNECTION=mysql
@@ -79,17 +90,16 @@ DB_USERNAME=root
 DB_PASSWORD=your_password
 ```
 
-### 4. Migrasi & Seeder
+Import database yang tersedia:
 
 ```bash
-# Buat semua tabel
-php artisan migrate
-
-# Isi data awal (user admin + image settings + sample data)
-php artisan db:seed
+# Import file SQL yang sudah disediakan
+mysql -u root -p db_kimiafarma < db_kimiafarma.sql
 ```
 
-### 5. Konfigurasi Email (untuk OTP)
+> Atau jika menggunakan phpMyAdmin, import file `db_kimiafarma.sql` melalui UI.
+
+### 5. Konfigurasi Email (untuk OTP Reset Password)
 
 Edit `.env`:
 
@@ -104,13 +114,56 @@ MAIL_FROM_ADDRESS=your@gmail.com
 MAIL_FROM_NAME="KFA GA System"
 ```
 
-### 6. Jalankan Server
+> 💡 **Catatan:** Untuk Gmail, gunakan [App Password](https://support.google.com/accounts/answer/185833) jika 2FA aktif.
+
+### 6. Jalankan Aplikasi
+
+#### Opsi 1: Menggunakan Composer Script (Recommended)
+
+Cara termudah — jalankan semua service sekaligus (server, queue, dan Vite) dengan satu perintah:
 
 ```bash
-php artisan serve
+composer run dev
 ```
 
-Buka: **http://localhost:8000**
+Perintah ini akan menjalankan secara bersamaan:
+- **Laravel server** di `http://127.0.0.1:8000`
+- **Queue listener** untuk proses background
+- **Vite dev server** untuk compile asset frontend (Tailwind CSS, dll.)
+
+#### Opsi 2: Manual (Multi Terminal)
+
+```bash
+# Terminal 1 — Jalankan server Laravel
+php artisan serve
+
+# Terminal 2 — Jalankan queue listener (untuk proses background seperti email OTP)
+php artisan queue:listen --tries=1
+
+# Terminal 3 — Compile asset frontend dengan Vite
+npm run dev
+```
+
+Buka browser dan akses: **http://127.0.0.1:8000**
+
+### 7. Build Asset untuk Production
+
+```bash
+npm run build
+```
+
+### 8. Perintah Composer yang Berguna
+
+```bash
+# Setup lengkap (install, migrate, build)
+composer run setup
+
+# Jalankan test
+composer run test
+
+# Clear semua cache
+php artisan optimize:clear
+```
 
 ---
 
@@ -130,7 +183,7 @@ Buka: **http://localhost:8000**
 ## 📁 Struktur Direktori
 
 ```
-kimiafarma-laravel/
+kimiafarmalaravel13/
 ├── app/
 │   ├── Http/
 │   │   ├── Controllers/
@@ -142,7 +195,7 @@ kimiafarma-laravel/
 │   │   │   └── SettingsController.php
 │   │   └── Middleware/
 │   │       ├── AuthSessionMiddleware.php
-│   │       └── RoleMiddleware.php
+│   │       └── PermissionOrRoleMiddleware.php
 │   └── Providers/
 │       └── AppServiceProvider.php
 ├── bootstrap/app.php           # Laravel 13 bootstrap
@@ -153,30 +206,62 @@ kimiafarma-laravel/
 ├── database/
 │   ├── migrations/             # Semua tabel dalam 1 file
 │   └── seeders/DatabaseSeeder.php
-├── resources/views/
-│   ├── layouts/app.blade.php   # Layout utama (sidebar + topbar)
-│   ├── auth/                   # Login, OTP, Reset password
-│   ├── dashboard.blade.php     # Hub utama
-│   ├── ga/                     # General Affair views
-│   ├── ac_monitoring/          # AC / Monitoring views
-│   ├── driver/                 # Driver views
-│   ├── profile/                # Profil user
-│   └── settings/               # Pengaturan gambar
-└── routes/web.php              # Semua route
+├── resources/
+│   ├── views/
+│   │   ├── layouts/app.blade.php   # Layout utama (sidebar + topbar)
+│   │   ├── auth/                   # Login, OTP, Reset password
+│   │   ├── dashboard.blade.php     # Hub utama
+│   │   ├── ga/                     # General Affair views
+│   │   ├── ac_monitoring/          # AC / Monitoring views
+│   │   ├── driver/                 # Driver views
+│   │   ├── profile/                # Profil user
+│   │   └── settings/               # Pengaturan gambar
+│   └── css/ / js/                  # Asset frontend
+├── routes/
+│   └── web.php                    # Semua route
+├── composer.json
+├── package.json
+└── db_kimiafarma.sql              # File import database
 ```
 
 ---
 
 ## 📦 Dependencies Utama
 
-```json
-{
-  "laravel/framework": "^11.0",
-  "barryvdh/laravel-dompdf": "^2.2",
-  "maatwebsite/excel": "^3.1",
-  "phpoffice/phpspreadsheet": "^1.29"
-}
-```
+### PHP (Composer) — Production
+
+| Package | Version | Fungsi |
+|---------|---------|--------|
+| `laravel/framework` | ^13.0 | Core framework Laravel |
+| `barryvdh/laravel-dompdf` | ^3.1 | Generate PDF |
+| `phpoffice/phpspreadsheet` | ^5.8 | Import/Export Excel |
+| `spatie/laravel-permission` | ^6.25 | Manajemen role & permission |
+| `laravel/tinker` | ^3.0 | REPL interaktif untuk debugging |
+
+### PHP (Composer) — Development
+
+| Package | Version | Fungsi |
+|---------|---------|--------|
+| `laravel/boost` | ^2.2 | Laravel Boost MCP tools |
+| `laravel/pint` | ^1.24 | Code formatter (PHP CS Fixer) |
+| `laravel/pail` | ^1.2.2 | Log viewer |
+| `phpunit/phpunit` | ^12.0 | Testing framework |
+| `barryvdh/laravel-ide-helper` | ^3.7 | IDE helper untuk autocomplete |
+| `fakerphp/faker` | ^1.23 | Generate fake data untuk testing |
+| `laravel/sail` | ^1.41 | Docker development environment |
+| `mockery/mockery` | ^1.6 | Mocking library untuk testing |
+| `nunomaduro/collision` | ^8.6 | Error handler untuk console |
+
+### Node.js (NPM)
+
+| Package | Version | Fungsi |
+|---------|---------|--------|
+| `vite` | ^7.0.7 | Build tool & dev server |
+| `laravel-vite-plugin` | ^2.0.0 | Integrasi Laravel + Vite |
+| `tailwindcss` | ^4.0.0 | Utility-first CSS framework |
+| `@tailwindcss/vite` | ^4.0.0 | Plugin Tailwind untuk Vite |
+| `axios` | ^1.11.0 | HTTP client untuk AJAX requests |
+| `concurrently` | ^9.0.1 | Jalankan multiple commands sekaligus |
 
 ---
 
@@ -215,6 +300,62 @@ kimiafarma-laravel/
 | Error handling  | `die()` / `exit()`            | Laravel Exception Handler            |
 | PDF             | dompdf raw                    | `barryvdh/laravel-dompdf` facade     |
 | Excel           | PHPExcel (deprecated)         | PhpSpreadsheet via helper controller |
+
+---
+
+## 🛠️ Perintah Artisan yang Berguna
+
+```bash
+# Jalankan server lokal
+php artisan serve
+
+# Clear semua cache (route, config, view, dll.)
+php artisan optimize:clear
+
+# Jalankan migration
+php artisan migrate
+
+# Jalankan seeder
+php artisan db:seed
+
+# Buat controller baru
+php artisan make:controller NamaController
+
+# Buat model baru
+php artisan make:model NamaModel
+
+# Buat middleware baru
+php artisan make:middleware NamaMiddleware
+
+# Buat seeder baru
+php artisan make:seeder NamaSeeder
+
+# Lihat semua route
+php artisan route:list
+
+# Lihat route dengan filter
+php artisan route:list --path=api
+php artisan route:list --method=GET
+
+# Jalankan test
+composer run test
+
+# Format kode PHP dengan Pint
+vendor/bin/pint
+```
+
+### Composer Scripts
+
+```bash
+# Setup lengkap (install dependency, migrate, build asset)
+composer run setup
+
+# Jalankan development server + queue + vite
+composer run dev
+
+# Jalankan test suite
+composer run test
+```
 
 ---
 
